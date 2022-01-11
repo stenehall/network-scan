@@ -36,7 +36,10 @@ func Database(db_name string) DB {
 		panic("failed to connect database")
 	}
 
-	db.AutoMigrate(&Hosts)
+	migrationError := db.AutoMigrate(&Hosts)
+	if migrationError != nil {
+		panic("failed to automigrate database")
+	}
 
 	return DB{
 		db,

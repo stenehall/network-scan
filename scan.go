@@ -11,7 +11,7 @@ func scan(scanner *nmap.Scanner, push Push) {
 
 	result, warnings, err := scanner.Run()
 	if err != nil {
-		fmt.Println("%#v", warnings)
+		fmt.Println("%v", warnings)
 		log.Fatalf("nmap scan failed: %v", err)
 	}
 
@@ -38,7 +38,7 @@ func scan(scanner *nmap.Scanner, push Push) {
 			fmt.Println("Exists in db %v (%v)", ip, hostname)
 		}
 
-		fmt.Printf("Host %q %v:\n", host.Addresses[0], host.Hostnames)
+		fmt.Printf("Host %q %s:\n", host.Addresses[0], host.Hostnames)
 	}
 
 	fmt.Printf("Nmap done: %d hosts up scanned in %3f seconds\n", len(result.Hosts), result.Stats.Finished.Elapsed)

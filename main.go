@@ -72,6 +72,4 @@ func main() {
 	// @TODO: Understand this black magic
 	// A select statement blocks until at least one of it’s cases can proceed. With zero cases this will never happen.
 	select {}
-
-	fmt.Println("Stopping?")
 }
