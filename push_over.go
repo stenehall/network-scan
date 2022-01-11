@@ -12,12 +12,9 @@ type Push struct {
 
 func (push Push) Message(msg string) {
 	message := pushover.NewMessage(msg)
-	response, err := push.app.SendMessage(message, push.recipient)
+	_, err := push.app.SendMessage(message, push.recipient)
 	if err != nil {
 		log.Panic(err)
-
-		// Print the response if you want
-		log.Println(response)
 	}
 }
 
