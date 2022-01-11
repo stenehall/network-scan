@@ -28,13 +28,15 @@ func main() {
 	pushoverRecipient := flag.String("pushoverRecipient", "", "Pushover recipient token")
 	flag.Parse()
 
-	if *pushoverToken == "" {
-		log.Fatalf("no pushover access token provided")
-	}
+	/*
+		if *pushoverToken == "" {
+			log.Fatalf("no pushover access token provided")
+		}
 
-	if *pushoverRecipient == "" {
-		log.Fatalf("no pushover recipient token provided")
-	}
+		if *pushoverRecipient == "" {
+			log.Fatalf("no pushover recipient token provided")
+		}
+	*/
 
 	push := PushOver(*pushoverToken, *pushoverRecipient)
 

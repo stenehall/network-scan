@@ -11,7 +11,7 @@ func scan(scanner *nmap.Scanner, push Push) {
 
 	result, warnings, err := scanner.Run()
 	if err != nil {
-		fmt.Println("%v", warnings)
+		fmt.Printf("%v", warnings)
 		log.Fatalf("nmap scan failed: %v", err)
 	}
 
@@ -35,10 +35,8 @@ func scan(scanner *nmap.Scanner, push Push) {
 
 		// Existing IP. No need to send a push.
 		if result.Error == nil {
-			fmt.Println("Exists in db %v (%v)", ip, hostname)
+			fmt.Printf("Exists in db %v (%v)", ip, hostname)
 		}
-
-		fmt.Printf("Host %q %s:\n", host.Addresses[0], host.Hostnames)
 	}
 
 	fmt.Printf("Nmap done: %d hosts up scanned in %3f seconds\n", len(result.Hosts), result.Stats.Finished.Elapsed)
