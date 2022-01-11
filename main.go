@@ -12,7 +12,7 @@ import (
 type arraySubNets []string
 
 func (i *arraySubNets) String() string {
-	return "my string representation"
+	return "wrong subnet format"
 }
 
 func (i *arraySubNets) Set(value string) error {
@@ -48,9 +48,9 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
-	// @TODO: Iterate over subnets instead of only accepting one
 	scanner, err := nmap.NewScanner(
-		nmap.WithTargets(subNets[0]),
+		// Fancy unpack of an []string
+		nmap.WithTargets(subNets...),
 		nmap.WithFastMode(),
 		nmap.WithContext(ctx),
 	)

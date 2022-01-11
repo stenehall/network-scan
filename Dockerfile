@@ -3,7 +3,7 @@ FROM golang:1.17 AS builder
 LABEL maintainer="Johan Stenehall"
 
 WORKDIR /go/src/app
-COPY go.mod go.sum main.go push_over.go scan.go ./
+COPY go.mod go.sum main.go push_over.go scan.go database.go ./
 
 RUN go mod download
 RUN CGO_ENABLED=0 GOOS=linux go build -o network-scan
