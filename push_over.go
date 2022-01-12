@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"github.com/gregdel/pushover"
 	"log"
+
+	"github.com/gregdel/pushover"
 )
 
 type Push struct {
@@ -18,8 +18,6 @@ func (push Push) Message(msg string) {
 		if err != nil {
 			log.Panic(err)
 		}
-	} else {
-		fmt.Println(msg)
 	}
 }
 

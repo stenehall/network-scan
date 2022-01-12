@@ -3,6 +3,7 @@ package main
 import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type DB struct {
@@ -31,7 +32,9 @@ func (database DB) Check(ip string, hostname string) (tx *gorm.DB) {
 }
 
 func Database(db_name string) DB {
-	db, err := gorm.Open(sqlite.Open(db_name), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(db_name), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Silent),
+	})
 	if err != nil {
 		panic("failed to connect database")
 	}

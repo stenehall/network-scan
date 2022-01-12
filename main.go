@@ -4,9 +4,10 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/Ullaakut/nmap/v2"
 	"log"
 	"time"
+
+	"github.com/Ullaakut/nmap/v2"
 )
 
 type arraySubNets []string
@@ -28,15 +29,9 @@ func main() {
 	pushoverRecipient := flag.String("pushoverRecipient", "", "Pushover recipient token")
 	flag.Parse()
 
-	/*
-		if *pushoverToken == "" {
-			log.Fatalf("no pushover access token provided")
-		}
-
-		if *pushoverRecipient == "" {
-			log.Fatalf("no pushover recipient token provided")
-		}
-	*/
+	if len(subNets) == 0 {
+		log.Fatal("no subnet provided, nothing to scan.")
+	}
 
 	push := PushOver(*pushoverToken, *pushoverRecipient)
 
@@ -52,7 +47,8 @@ func main() {
 
 	scanner, err := nmap.NewScanner(
 		// Fancy unpack of an []string
-		nmap.WithTargets(subNets...),
+		// nmap.WithTargets(subNets...),
+		nmap.WithTargets("10.0.0.0/24"),
 		nmap.WithFastMode(),
 		nmap.WithContext(ctx),
 	)

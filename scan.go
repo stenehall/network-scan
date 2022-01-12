@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/Ullaakut/nmap/v2"
 	"log"
+
+	"github.com/Ullaakut/nmap/v2"
 )
 
 func scan(scanner *nmap.Scanner, push Push) {
@@ -28,14 +29,14 @@ func scan(scanner *nmap.Scanner, push Push) {
 		// If the IP is missing in the db it means we have a new host
 		// We should save it and alert the user.
 		if result.Error != nil {
-			msg := fmt.Sprintf("Found a new IP on your network %v (%v)", ip, hostname)
-			fmt.Println(msg)
+			msg := fmt.Sprintf("Found a new IP on your network %v (%v)\n", ip, hostname)
+			fmt.Printf("- New\t%v\t(%v)\n", ip, hostname)
 			push.Message(msg)
 		}
 
 		// Existing IP. No need to send a push.
 		if result.Error == nil {
-			fmt.Printf("Exists in db %v (%v)", ip, hostname)
+			fmt.Printf("- Existing\t%v\t(%v)\n", ip, hostname)
 		}
 	}
 
