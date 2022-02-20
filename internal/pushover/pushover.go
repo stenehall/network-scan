@@ -1,7 +1,8 @@
-package main
+package pushover
 
 import (
-	"log"
+	"fmt"
+	"os"
 
 	"github.com/gregdel/pushover"
 )
@@ -16,9 +17,19 @@ func (push Push) Message(msg string) {
 		message := pushover.NewMessage(msg)
 		_, err := push.app.SendMessage(message, push.recipient)
 		if err != nil {
-			log.Panic(err)
+			fmt.Println(err)
+			os.Exit(1)
 		}
 	}
+}
+
+func (push Push) Validate() error {
+	if push.app != nil && push.recipient != nil {
+		_, err := push.app.GetRecipientDetails(push.recipient)
+		return err
+	}
+
+	return nil
 }
 
 func PushOver(pushoverToken string, pushoverRecipient string) Push {
