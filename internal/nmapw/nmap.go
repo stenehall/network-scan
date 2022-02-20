@@ -9,15 +9,18 @@ import (
 	"github.com/Ullaakut/nmap/v2"
 )
 
+// NmapHost is the result object
 type NmapHost struct {
 	Ip       string
 	Hostname string
 }
 
+// Scanner model
 type Scanner struct {
 	scanner *nmap.Scanner
 }
 
+// NewScanner returns a new instance of the scanner
 func NewScanner(subNets []string) (*Scanner, error) {
 	scanner, err := nmap.NewScanner(
 		nmap.WithTargets(subNets...),
@@ -40,6 +43,7 @@ func duration(msg string, start time.Time) {
 	log.Printf("%v: %v\n", msg, time.Since(start))
 }
 
+// Scan runs a new scan
 func (s *Scanner) Scan() []NmapHost {
 	defer duration(track("nmap scan took"))
 

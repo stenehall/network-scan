@@ -4,4 +4,8 @@ build:
 run:
 	docker run --rm -t network-scan
 
+
+lint:
+	goreportcard-cli -v
+
 include tools/rules.mk

@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+// DB model
 type DB struct {
 	db *gorm.DB
 }
@@ -18,6 +19,7 @@ type host struct {
 
 var hosts []host
 
+// AddIfNotExist adds the ip/hostname if not already added
 func (database DB) AddIfNotExist(ip string, hostname string) (tx *gorm.DB) {
 	result := database.db.Where("IP = ?", ip).First(&hosts)
 
@@ -29,6 +31,7 @@ func (database DB) AddIfNotExist(ip string, hostname string) (tx *gorm.DB) {
 	return result
 }
 
+// Database constructor
 func Database(dbName string) DB {
 	db, err := gorm.Open(sqlite.Open(dbName), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Silent),

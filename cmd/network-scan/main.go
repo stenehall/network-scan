@@ -13,31 +13,29 @@ import (
 	"network-scan/internal/pushover"
 )
 
-type SubNets []string
+type subNets []string
 
-func (i *SubNets) String() string {
+func (i *subNets) String() string {
 	return "wrong subnet format"
 }
 
-func (i *SubNets) Set(value string) error {
+func (i *subNets) Set(value string) error {
 	*i = append(*i, value)
 	return nil
 }
 
 func main() {
-	var subNets SubNets
+	var subNets subNets
 
 	flag.Var(&subNets, "subnet", "IP subnet to scan")
 	pushoverToken := flag.String("pushoverToken", os.Getenv("PUSHOVER_TOKEN"), "Pushover access token")
 	pushoverRecipient := flag.String("pushoverRecipient", os.Getenv("PUSHOVER_RECIPIENT"), "Pushover recipient token")
 	flag.Parse()
 
-	push := pushover.PushOver(*pushoverToken, *pushoverRecipient)
+	push, err := pushover.PushOver(*pushoverToken, *pushoverRecipient)
 	if *pushoverToken == "" || *pushoverRecipient == "" {
 		fmt.Println("No PushOver tokens provided, only outputting to log")
 	}
-
-	err := push.Validate()
 	if err != nil {
 		log.Fatalf("The PushOver tokens provided seems invalid, %v\n", err)
 	}
@@ -63,16 +61,16 @@ func main() {
 
 	s, err := nmapw.NewScanner(subNets)
 	if err != nil {
-		log.Fatalf("couldn't instanciate nmap")
+		log.Fatalf("couldn't create a new  nmap instance")
 	}
 
-	scan(s, db)
+	scan(s, db, push)
 
 	// Wait 2 minutes then rescan
 	go func() {
 		c := time.Tick(1200 * time.Second)
 		for range c {
-			scan(s, db)
+			scan(s, db, push)
 		}
 	}()
 
@@ -81,7 +79,7 @@ func main() {
 	select {}
 }
 
-func scan(scanner *nmapw.Scanner, database database.DB) {
+func scan(scanner *nmapw.Scanner, database database.DB, push pushover.Push) {
 	// Run initial scan
 	hosts := scanner.Scan()
 
@@ -93,7 +91,7 @@ func scan(scanner *nmapw.Scanner, database database.DB) {
 		if result.Error != nil {
 			msg := fmt.Sprintf("- New\t%v\t(%v)", host.Ip, host.Hostname)
 			fmt.Println(msg)
-			// push.Message(msg)
+			push.Message(msg)
 		}
 
 		// Existing IP. No need to send a push.

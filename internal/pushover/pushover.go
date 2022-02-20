@@ -7,11 +7,13 @@ import (
 	"github.com/gregdel/pushover"
 )
 
+// Push model
 type Push struct {
 	app       *pushover.Pushover
 	recipient *pushover.Recipient
 }
 
+// Message sends a new message over push over
 func (push Push) Message(msg string) {
 	if push.app != nil && push.recipient != nil {
 		message := pushover.NewMessage(msg)
@@ -23,7 +25,8 @@ func (push Push) Message(msg string) {
 	}
 }
 
-func (push Push) Validate() error {
+// Validate the provided setup
+func (push Push) validate() error {
 	if push.app != nil && push.recipient != nil {
 		_, err := push.app.GetRecipientDetails(push.recipient)
 		return err
@@ -32,7 +35,8 @@ func (push Push) Validate() error {
 	return nil
 }
 
-func PushOver(pushoverToken string, pushoverRecipient string) Push {
+// PushOver creates a new instance of the pushover client
+func PushOver(pushoverToken string, pushoverRecipient string) (Push, error) {
 	push := Push{
 		nil,
 		nil,
@@ -44,5 +48,7 @@ func PushOver(pushoverToken string, pushoverRecipient string) Push {
 		}
 	}
 
-	return push
+	err := push.validate()
+
+	return push, err
 }
