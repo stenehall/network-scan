@@ -6,46 +6,73 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-// DB model
+// DB model.
 type DB struct {
 	db *gorm.DB
 }
 
-type host struct {
-	gorm.Model
+type Host struct {
 	IP       string
 	Hostname string
 }
 
-var hosts []host
+// AddIfNotExist adds the ip/hostname if not already added.
+func (database DB) AddIfNotExist(ipAddr string, hostname string) (tx *gorm.DB) {
+	var hosts []Host
 
-// AddIfNotExist adds the ip/hostname if not already added
-func (database DB) AddIfNotExist(ip string, hostname string) (tx *gorm.DB) {
-	result := database.db.Where("IP = ?", ip).First(&hosts)
+	result := database.db.Where("IP = ?", ipAddr).First(&hosts)
 
 	if result.Error != nil {
 		// Save the new IP to DB.
-		database.db.Create(&host{IP: ip, Hostname: hostname})
+		database.db.Create(&Host{IP: ipAddr, Hostname: hostname})
 	}
 
 	return result
 }
 
-// Database constructor
+func (database DB) GetAll() []Host {
+	var hosts []Host
+	database.db.Find(&hosts)
+
+	return hosts
+}
+
+// Database constructor.
 func Database(dbName string) DB {
-	db, err := gorm.Open(sqlite.Open(dbName), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Silent),
-	})
+	var hosts []Host
+
+	gormInstance, err := gorm.Open(
+		sqlite.Open(dbName),
+		&gorm.Config{
+			SkipDefaultTransaction:                   false,
+			NamingStrategy:                           nil,
+			FullSaveAssociations:                     false,
+			Logger:                                   logger.Default.LogMode(logger.Silent),
+			NowFunc:                                  nil,
+			DryRun:                                   false,
+			PrepareStmt:                              false,
+			DisableAutomaticPing:                     false,
+			DisableForeignKeyConstraintWhenMigrating: false,
+			DisableNestedTransaction:                 false,
+			AllowGlobalUpdate:                        false,
+			QueryFields:                              false,
+			CreateBatchSize:                          0,
+			ClauseBuilders:                           nil,
+			ConnPool:                                 nil,
+			Dialector:                                nil,
+			Plugins:                                  nil,
+		},
+	)
 	if err != nil {
 		panic("failed to connect database")
 	}
 
-	migrationError := db.AutoMigrate(&hosts)
+	migrationError := gormInstance.AutoMigrate(&hosts)
 	if migrationError != nil {
 		panic("failed to auto-migrate database")
 	}
 
 	return DB{
-		db,
+		gormInstance,
 	}
 }

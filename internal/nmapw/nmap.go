@@ -9,18 +9,18 @@ import (
 	"github.com/Ullaakut/nmap/v2"
 )
 
-// NmapHost is the result object
+// NmapHost is the result object.
 type NmapHost struct {
-	Ip       string
+	IP       string
 	Hostname string
 }
 
-// Scanner model
+// Scanner model.
 type Scanner struct {
 	scanner *nmap.Scanner
 }
 
-// NewScanner returns a new instance of the scanner
+// NewScanner returns a new instance of the scanner.
 func NewScanner(subNets []string) (*Scanner, error) {
 	scanner, err := nmap.NewScanner(
 		nmap.WithTargets(subNets...),
@@ -28,9 +28,15 @@ func NewScanner(subNets []string) (*Scanner, error) {
 		nmap.WithSCTPDiscovery(),
 		nmap.WithACKDiscovery(),
 		nmap.WithSYNDiscovery(),
-		nmap.WithICMPEchoDiscovery(),
+		// nmap.WithICMPEchoDiscovery(),
 		nmap.WithICMPNetMaskDiscovery(),
+		nmap.WithIPProtocolPingDiscovery(),
+		nmap.WithFastMode(),
 	)
+
+	if err != nil {
+		err = fmt.Errorf("newScanner %w", err)
+	}
 
 	return &Scanner{scanner: scanner}, err
 }
@@ -43,48 +49,57 @@ func duration(msg string, start time.Time) {
 	log.Printf("%v: %v\n", msg, time.Since(start))
 }
 
-// Scan runs a new scan
-func (s *Scanner) Scan() []NmapHost {
+// Scan runs a new scan.
+func (s *Scanner) Scan() ([]NmapHost, error) {
 	defer duration(track("nmap scan took"))
 
-	fmt.Println("Starting a new scan")
+	log.Println("Starting a new scan")
 
-	var hosts []NmapHost
+	hosts := make([]NmapHost, 0)
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Minute)
 	defer cancel()
 	s.scanner.AddOptions(nmap.WithContext(ctx))
 
 	progress := make(chan float32, 1)
 
-	fmt.Printf("Progress: %v %%", 0)
+	log.Printf("Progress: %v %%", 0)
 
 	go func() {
 		for p := range progress {
-			fmt.Printf("\rProgress: %v %%", p)
+			log.Printf("\rProgress: %v %%", p)
 		}
 	}()
 	result, warnings, err := s.scanner.RunWithProgress(progress)
 
 	if err != nil {
-		fmt.Printf("%v", warnings)
-		log.Fatalf("nmapw scan failed: %v", err)
+		log.Printf("%v", warnings)
+		return nil, fmt.Errorf("nmapw scan failed: %w", err)
 	}
+
+	log.Println("----------------------------------")
+	log.Println(result)
+	log.Println("----------------------------------")
 
 	for _, host := range result.Hosts {
 		if len(host.Addresses) == 0 {
 			continue
 		}
+		log.Println("----------------------------------")
+		log.Println(host.Hostnames)
+		log.Println(host.Addresses)
+		log.Println(host.Comment)
+		log.Println(host.Ports)
+		log.Println(host.Status)
 
 		ip, hostname := extract(host)
 		hosts = append(hosts, NmapHost{
-			Ip:       ip,
+			IP:       ip,
 			Hostname: hostname,
 		})
-
 	}
 
-	fmt.Printf("Nmap done: %d hosts up scanned in %3f seconds\n", len(result.Hosts), result.Stats.Finished.Elapsed)
-	return hosts
+	log.Printf("Nmap done: %d hosts up scanned in %3f seconds\n", len(result.Hosts), result.Stats.Finished.Elapsed)
+	return hosts, nil
 }
 
 func extract(host nmap.Host) (string, string) {
